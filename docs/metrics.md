@@ -1,18 +1,18 @@
 # Metrics
 
-Pilot collects time-series performance metrics from your app and displays them as charts on the dashboard.
+OpButton collects time-series performance metrics from your app and displays them as charts on the dashboard.
 
 ## Configuration
 
 ```java
-PilotMetricConfigBuilder metricConfig = new PilotMetricConfigBuilder()
+OpButtonMetricConfigBuilder metricConfig = new OpButtonMetricConfigBuilder()
     .setEnabled(true)                // default: true
     .setSampleIntervalMs(200)        // 100–1000 ms (default: 200)
     .setBufferSize(2000)             // max buffered samples (default: 2000)
     .setBatchSize(200)               // samples per flush (default: 200)
     .addCollector(myCollector);
 
-PilotConfig config = new PilotConfig.Builder(url, token)
+OpButtonConfig config = new OpButtonConfig.Builder(url, token)
     .setMetricConfig(metricConfig)
     .build();
 ```
@@ -36,9 +36,9 @@ PilotConfig config = new PilotConfig.Builder(url, token)
 ## Custom metric types
 
 ```java
-PilotMetricType loadTime = PilotMetricType.create("scene_load_time");
-PilotMetricType loadTimeMs = PilotMetricType.create("scene_load_time", "ms");
-PilotMetricType errors = PilotMetricType.create("error_count", "errors", PilotMetricAggregation.COUNTER);
+OpButtonMetricType loadTime = OpButtonMetricType.create("scene_load_time");
+OpButtonMetricType loadTimeMs = OpButtonMetricType.create("scene_load_time", "ms");
+OpButtonMetricType errors = OpButtonMetricType.create("error_count", "errors", OpButtonMetricAggregation.COUNTER);
 ```
 
 ### Aggregation modes
@@ -54,10 +54,10 @@ PilotMetricType errors = PilotMetricType.create("error_count", "errors", PilotMe
 ### Manual recording
 
 ```java
-PilotMetrics metrics = Pilot.getMetrics();
+OpButtonMetrics metrics = OpButton.getMetrics();
 
-metrics.record(PilotMetricType.FPS, 60.0);
-metrics.record(PilotMetricType.MEMORY, Runtime.getRuntime().totalMemory());
+metrics.record(OpButtonMetricType.FPS, 60.0);
+metrics.record(OpButtonMetricType.MEMORY, Runtime.getRuntime().totalMemory());
 metrics.record(myCustomType, 42.0, System.currentTimeMillis());
 ```
 
@@ -66,24 +66,24 @@ metrics.record(myCustomType, 42.0, System.currentTimeMillis());
 Collectors are called automatically on each sample interval. Use them for periodic measurements:
 
 ```java
-PilotMetricCollector collector = out -> {
-    out.add(new PilotMetricEntry(PilotMetricType.FPS, game.getFps()));
-    out.add(new PilotMetricEntry(PilotMetricType.MEMORY, getUsedMemory()));
-    out.add(new PilotMetricEntry(myCustomType, computeCustomValue()));
+OpButtonMetricCollector collector = out -> {
+    out.add(new OpButtonMetricEntry(OpButtonMetricType.FPS, game.getFps()));
+    out.add(new OpButtonMetricEntry(OpButtonMetricType.MEMORY, getUsedMemory()));
+    out.add(new OpButtonMetricEntry(myCustomType, computeCustomValue()));
 };
 
 // Add via config
-new PilotMetricConfigBuilder().addCollector(collector);
+new OpButtonMetricConfigBuilder().addCollector(collector);
 
 // Or at runtime
-Pilot.getMetrics().addCollector(collector);
-Pilot.getMetrics().removeCollector(collector);
+OpButton.getMetrics().addCollector(collector);
+OpButton.getMetrics().removeCollector(collector);
 ```
 
 ## Runtime adjustments
 
 ```java
-PilotMetrics metrics = Pilot.getMetrics();
+OpButtonMetrics metrics = OpButton.getMetrics();
 
 metrics.setSampleIntervalMs(500);  // slow down sampling
 metrics.setBufferSize(5000);       // increase buffer

@@ -1,6 +1,6 @@
 # Android Integration
 
-Step-by-step guide for adding Pilot SDK to your Android project.
+Step-by-step guide for adding OpButton SDK to your Android project.
 
 ## Requirements
 
@@ -27,23 +27,23 @@ In your module `build.gradle`:
 
 ```groovy
 dependencies {
-    implementation 'com.github.irov:javapilot:1.0.25'
+    implementation 'com.github.opbutton-org:opbutton-sdk-java:master-SNAPSHOT'
 }
 ```
 
 ## 3. Configure the SDK
 
-Create a `PilotConfig` and initialize the SDK in your `Application.onCreate()`:
+Create a `OpButtonConfig` and initialize the SDK in your `Application.onCreate()`:
 
 ```java
-PilotConfig config = new PilotConfig.Builder(
-        "https://pilot.example.com",  // your Pilot dashboard URL
-        "plt_your_api_token"          // project API token from dashboard
+OpButtonConfig config = new OpButtonConfig.Builder(
+        "https://opbutton.example.com",  // your OpButton dashboard URL
+        "opbutton_your_api_token"          // project API token from dashboard
     )
     .setDeviceName("Pixel 8")
     .build();
 
-Pilot.initialize(config, this); // pass Application context
+OpButton.initialize(config, this); // pass Application context
 ```
 
 ### Configuration options
@@ -55,26 +55,26 @@ Pilot.initialize(config, this); // pass Application context
 | `setPollIntervalMs(long)` | 10000 | Status polling interval (ms) |
 | `setActionPollIntervalMs(long)` | 2000 | Action polling interval (ms) |
 | `setAutoConnect(boolean)` | true | Connect automatically after init |
-| `setLoggerListener(PilotLoggerListener)` | — | Redirect SDK diagnostic logs |
-| `setSessionListener(PilotSessionListener)` | — | Session lifecycle callbacks |
-| `setActionListener(PilotActionListener)` | — | Remote action callbacks |
-| `setSessionAttributes(PilotSessionAttributeBuilder)` | — | Key-value pairs attached to the session |
-| `setLogConfig(PilotLogConfigBuilder)` | — | Logging configuration |
-| `setMetricConfig(PilotMetricConfigBuilder)` | — | Metrics configuration |
+| `setLoggerListener(OpButtonLoggerListener)` | — | Redirect SDK diagnostic logs |
+| `setSessionListener(OpButtonSessionListener)` | — | Session lifecycle callbacks |
+| `setActionListener(OpButtonActionListener)` | — | Remote action callbacks |
+| `setSessionAttributes(OpButtonSessionAttributeBuilder)` | — | Key-value pairs attached to the session |
+| `setLogConfig(OpButtonLogConfigBuilder)` | — | Logging configuration |
+| `setMetricConfig(OpButtonMetricConfigBuilder)` | — | Metrics configuration |
 
 ## 4. Session attributes
 
 Attach static and dynamic key-value pairs to identify the session. Native types are preserved:
 
 ```java
-PilotSessionAttributeBuilder sessionAttrs = new PilotSessionAttributeBuilder()
+OpButtonSessionAttributeBuilder sessionAttrs = new OpButtonSessionAttributeBuilder()
     .put("is_debug", BuildConfig.DEBUG)          // boolean
     .put("install_version", 42)                  // int
     .put("build_type", "debug")                  // string
     .put("referrer", null)                       // null
     .putProvider("user_id", () -> getUserId());   // dynamic — re-evaluated on each poll
 
-PilotConfig config = new PilotConfig.Builder(url, token)
+OpButtonConfig config = new OpButtonConfig.Builder(url, token)
     .setSessionAttributes(sessionAttrs)
     .build();
 ```
@@ -84,7 +84,7 @@ PilotConfig config = new PilotConfig.Builder(url, token)
 If `autoConnect` is true (default), the SDK connects after `initialize()`. Otherwise call:
 
 ```java
-Pilot.connect();
+OpButton.connect();
 ```
 
 The SDK will:
@@ -97,7 +97,7 @@ The SDK will:
 Check the current state:
 
 ```java
-PilotSessionStatus status = Pilot.getStatus();
+OpButtonSessionStatus status = OpButton.getStatus();
 ```
 
 Possible values: `DISCONNECTED`, `CONNECTING`, `WAITING_APPROVAL`, `ACTIVE`, `AUTH_FAILED`, `REJECTED`, `CLOSED`, `ERROR`.
@@ -105,22 +105,22 @@ Possible values: `DISCONNECTED`, `CONNECTING`, `WAITING_APPROVAL`, `ACTIVE`, `AU
 ## 7. Session lifecycle listener
 
 ```java
-Pilot.addSessionListener(new PilotSessionListener() {
-    @Override public void onPilotSessionConnecting() { }
-    @Override public void onPilotSessionWaitingApproval(String requestId) { }
-    @Override public void onPilotSessionStarted(String sessionToken) { }
-    @Override public void onPilotSessionClosed() { }
-    @Override public void onPilotSessionRejected() { }
-    @Override public void onPilotSessionAuthFailed() { }
-    @Override public void onPilotSessionError(PilotException e) { }
+OpButton.addSessionListener(new OpButtonSessionListener() {
+    @Override public void onOpButtonSessionConnecting() { }
+    @Override public void onOpButtonSessionWaitingApproval(String requestId) { }
+    @Override public void onOpButtonSessionStarted(String sessionToken) { }
+    @Override public void onOpButtonSessionClosed() { }
+    @Override public void onOpButtonSessionRejected() { }
+    @Override public void onOpButtonSessionAuthFailed() { }
+    @Override public void onOpButtonSessionError(OpButtonException e) { }
 });
 ```
 
 ## 8. Disconnect & shutdown
 
 ```java
-Pilot.disconnect();  // end current session
-Pilot.shutdown();    // release all resources
+OpButton.disconnect();  // end current session
+OpButton.shutdown();    // release all resources
 ```
 
 ## ProGuard / R8

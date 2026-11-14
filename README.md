@@ -1,8 +1,8 @@
-# Pilot SDK for Android
+# OpButton SDK for Android
 
-[![JitPack](https://jitpack.io/v/irov/javapilot.svg)](https://jitpack.io/#irov/javapilot)
+[![JitPack](https://jitpack.io/v/opbutton-org/opbutton-sdk-java.svg)](https://jitpack.io/#opbutton-org/opbutton-sdk-java)
 
-Lightweight Android SDK for connecting apps to **Pilot** — a real-time remote debug panel. Inspect state, push commands, stream logs and control your app from a web dashboard while it runs on device.
+Lightweight Android SDK for connecting apps to **OpButton** — a real-time remote debug panel. Inspect state, push commands, stream logs and control your app from a web dashboard while it runs on device.
 
 ## Features
 
@@ -43,25 +43,25 @@ dependencyResolutionManagement {
 
 // build.gradle
 dependencies {
-    implementation 'com.github.irov:javapilot:1.0.25'
+    implementation 'com.github.opbutton-org:opbutton-sdk-java:master-SNAPSHOT'
 }
 ```
 
 ```java
 // Initialize
-PilotConfig config = new PilotConfig.Builder(
-        "https://pilot.example.com",
-        "plt_your_api_token"
+OpButtonConfig config = new OpButtonConfig.Builder(
+        "https://opbutton.example.com",
+        "opbutton_your_api_token"
     )
     .setDeviceName("Pixel 8")
     .build();
 
-Pilot.initialize(config, app);
+OpButton.initialize(config, app);
 
 // Build UI
-PilotUI ui = Pilot.getUI();
-PilotTab tab = ui.addTab("game", "Game Controls");
-PilotLayout root = tab.vertical();
+OpButtonUI ui = OpButton.getUI();
+OpButtonTab tab = ui.addTab("game", "Game Controls");
+OpButtonLayout root = tab.vertical();
 
 root.addButton("btn-restart", "Restart")
     .variant("contained").color("error")
@@ -72,14 +72,14 @@ root.addStat("stat-fps", "FPS")
     .valueProvider(() -> game.getFps());
 
 // Connect
-Pilot.connect();
+OpButton.connect();
 ```
 
 See [Android Integration](docs/android-integration.md) for the full setup guide.
 
-If you want to use the dashboard Live tab, initialize Pilot with an Application or a Context that resolves to an Application via getApplicationContext(). Live capture stays off by default and starts only after Stream is enabled from the web dashboard.
+If you want to use the dashboard Live tab, initialize OpButton with an Application or a Context that resolves to an Application via getApplicationContext(). Live capture stays off by default and starts only after Stream is enabled from the web dashboard.
 
-To enable the media pipeline, the backend must be configured with LiveKit credentials via `PLT_LIVEKIT_URL`, `PLT_LIVEKIT_API_KEY`, and `PLT_LIVEKIT_API_SECRET`.
+To enable the media pipeline, the backend must be configured with LiveKit credentials via `OPBUTTON_LIVEKIT_URL`, `OPBUTTON_LIVEKIT_API_KEY`, and `OPBUTTON_LIVEKIT_API_SECRET`.
 
 ## Connection flow
 
@@ -99,30 +99,30 @@ To enable the media pipeline, the backend must be configured with LiveKit creden
 
 ```java
 // Simple log
-Pilot.log(PilotLogLevel.INFO, "Game started");
+OpButton.log(OpButtonLogLevel.INFO, "Game started");
 
 // Log with category and thread
-Pilot.log(PilotLogLevel.WARNING, "Low memory", "system", "main");
+OpButton.log(OpButtonLogLevel.WARNING, "Low memory", "system", "main");
 
 // Log with metadata (native Map instead of JSONObject)
 Map<String, Object> meta = Map.of(
     "heap_mb", Runtime.getRuntime().totalMemory() / 1024 / 1024,
     "is_low", true
 );
-Pilot.log(PilotLogLevel.ERROR, "OOM crash", meta);
+OpButton.log(OpButtonLogLevel.ERROR, "OOM crash", meta);
 
 // Full log call
-Pilot.log(PilotLogLevel.ERROR, "Crash detected", "crashes", "worker-3", meta);
+OpButton.log(OpButtonLogLevel.ERROR, "Crash detected", "crashes", "worker-3", meta);
 ```
 
 ## Custom logger
 
 ```java
-PilotLogConfigBuilder logConfig = new PilotLogConfigBuilder()
+OpButtonLogConfigBuilder logConfig = new OpButtonLogConfigBuilder()
     .setEnabled(true)
-    .setLogLevel(PilotLogLevel.INFO);
+    .setLogLevel(OpButtonLogLevel.INFO);
 
-PilotConfig config = new PilotConfig.Builder(url, token)
+OpButtonConfig config = new OpButtonConfig.Builder(url, token)
     .setLoggerListener((level, tag, message, throwable) -> {
         MyLogger.log(tag + ": " + message);
     })

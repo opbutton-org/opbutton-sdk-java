@@ -4,11 +4,11 @@ plugins {
     id 'maven-publish'
 }
 
-group = 'org.pilot'
+group = 'org.opbutton'
 version = '1.0.34'
 
 android {
-    namespace "org.pilot.sdk"
+    namespace "org.opbutton.sdk"
     compileSdk 34
 
     defaultConfig {
@@ -54,13 +54,13 @@ afterEvaluate {
             release(MavenPublication) {
                 from components.release
 
-                groupId = 'org.pilot'
-                artifactId = 'pilot-sdk'
+                groupId = 'org.opbutton'
+                artifactId = 'opbutton-sdk'
                 version = project.version
 
                 pom {
-                    name = 'Pilot SDK'
-                    description = 'Android SDK for Pilot remote debug panel'
+                    name = 'OpButton SDK'
+                    description = 'Android SDK for OpButton remote debug panel'
                 }
             }
         }

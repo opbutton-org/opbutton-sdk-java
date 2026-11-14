@@ -1,16 +1,16 @@
 # Widgets
 
-Pilot UI is built with tabs, layouts, and widgets. Each service in your app can add its own tab on the dashboard.
+OpButton UI is built with tabs, layouts, and widgets. Each service in your app can add its own tab on the dashboard.
 
 ## Tabs
 
 ```java
-PilotUI ui = Pilot.getUI();
+OpButtonUI ui = OpButton.getUI();
 
-PilotTab tab = ui.addTab("game", "Game Controls");
+OpButtonTab tab = ui.addTab("game", "Game Controls");
 
 // Retrieve or remove tabs later
-PilotTab existing = ui.getTab("game");
+OpButtonTab existing = ui.getTab("game");
 ui.removeTab("game");
 ```
 
@@ -19,14 +19,14 @@ ui.removeTab("game");
 Every tab starts with a layout direction:
 
 ```java
-PilotLayout root = tab.vertical();   // top-to-bottom
-PilotLayout root = tab.horizontal(); // left-to-right
+OpButtonLayout root = tab.vertical();   // top-to-bottom
+OpButtonLayout root = tab.horizontal(); // left-to-right
 ```
 
 Nest layouts for complex arrangements:
 
 ```java
-PilotLayout row = root.addHorizontal();
+OpButtonLayout row = root.addHorizontal();
 row.addButton("btn-a", "Left");
 row.addPadding(1.0);                 // flexible spacer
 row.addButton("btn-b", "Right");
@@ -35,7 +35,7 @@ row.addButton("btn-b", "Right");
 ### Collapsible sections
 
 ```java
-PilotLayout section = root.addCollapsible("Advanced");
+OpButtonLayout section = root.addCollapsible("Advanced");
 section.addSwitch("sw-debug", "Verbose logging");
 ```
 
@@ -164,7 +164,7 @@ root.addStat("stat-score", "Score")
 
 ## Remote actions
 
-All interactive widgets (`Button`, `Switch`, `Input`, `Select`, `Textarea`) fire callbacks when the user interacts from the dashboard. The callback receives a `PilotAction`:
+All interactive widgets (`Button`, `Switch`, `Input`, `Select`, `Textarea`) fire callbacks when the user interacts from the dashboard. The callback receives a `OpButtonAction`:
 
 ```java
 action.getId();          // unique action UUID
@@ -187,15 +187,15 @@ action.getPayload();     // JSONObject with action data
 Receive all actions in one place:
 
 ```java
-Pilot.addActionListener(action -> {
-    Log.d("Pilot", "Action on " + action.getWidgetId());
+OpButton.addActionListener(action -> {
+    Log.d("OpButton", "Action on " + action.getWidgetId());
 });
 ```
 
 Acknowledge actions with an optional result payload:
 
 ```java
-Pilot.acknowledgeAction(action.getId(), new JSONObject().put("ok", true));
+OpButton.acknowledgeAction(action.getId(), new JSONObject().put("ok", true));
 ```
 
 ---

@@ -1,6 +1,6 @@
 # Self-Hosting
 
-Deploy the Pilot dashboard, backend, database, and optionally a LiveKit server on your own infrastructure.
+Deploy the OpButton dashboard, backend, database, and optionally a LiveKit server on your own infrastructure.
 
 ## Architecture
 
@@ -14,11 +14,11 @@ Deploy the Pilot dashboard, backend, database, and optionally a LiveKit server o
 ## Quick start (development)
 
 ```bash
-cd webpilot
+cd opbutton-site
 docker compose up
 ```
 
-This starts the backend, client, and PostgreSQL with default credentials (`pilot`/`pilot`).
+This starts the backend, client, and PostgreSQL with default credentials (`opbutton`/`opbutton`).
 
 ## Production deployment
 
@@ -28,11 +28,11 @@ Use `docker-compose.prod.yml` with an `.env` file. See the GitHub Actions workfl
 
 | Variable | Description |
 |----------|-------------|
-| `PLT_DATABASE_URL` | PostgreSQL connection string |
-| `PLT_SECRET_KEY` | Backend session secret |
-| `PLT_GOOGLE_CLIENT_ID` | Google OAuth client ID |
-| `PLT_GOOGLE_CLIENT_SECRET` | Google OAuth client secret |
-| `PLT_DOMAIN` | Your domain (e.g. `pilot.example.com`) |
+| `OPBUTTON_DATABASE_URL` | PostgreSQL connection string |
+| `OPBUTTON_SECRET_KEY` | Backend session secret |
+| `OPBUTTON_GOOGLE_CLIENT_ID` | Google OAuth client ID |
+| `OPBUTTON_GOOGLE_CLIENT_SECRET` | Google OAuth client secret |
+| `OPBUTTON_DOMAIN` | Your domain (e.g. `opbutton.example.com`) |
 
 ### Required GitHub secrets (for CI/CD)
 
@@ -62,12 +62,12 @@ Point all of these to the server IP:
 Add these to `PRODUCTION_ENV`:
 
 ```env
-PLT_LIVEKIT_API_KEY=your-livekit-api-key
-PLT_LIVEKIT_API_SECRET=your-livekit-api-secret
-PLT_LIVEKIT_ROOM_PREFIX=pilot-session
+OPBUTTON_LIVEKIT_API_KEY=your-livekit-api-key
+OPBUTTON_LIVEKIT_API_SECRET=your-livekit-api-secret
+OPBUTTON_LIVEKIT_ROOM_PREFIX=opbutton-session
 ```
 
-`PLT_LIVEKIT_URL` is injected automatically as `wss://rtc.<your-domain>` by the deploy workflow.
+`OPBUTTON_LIVEKIT_URL` is injected automatically as `wss://rtc.<your-domain>` by the deploy workflow.
 
 ### Firewall rules
 
@@ -85,7 +85,7 @@ Open these ports for LiveKit media:
 If you deploy manually instead of via GitHub Actions, you also need:
 
 - A `livekit.yaml` file next to the compose file
-- `PLT_LIVEKIT_URL=wss://rtc.<your-domain>` in `.env`
+- `OPBUTTON_LIVEKIT_URL=wss://rtc.<your-domain>` in `.env`
 - Nginx reverse proxy and TLS certificate for `rtc.<your-domain>`
 
 ### Current limitations
