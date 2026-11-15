@@ -45,7 +45,7 @@ public final class OpButtonUI {
     private final AtomicInteger m_idCounter = new AtomicInteger(0);
     private int m_version = 2;
     private final AtomicInteger m_revision = new AtomicInteger(1);
-    private int m_sentRevision = 0;
+    private volatile int m_sentRevision = 0;
 
     OpButtonUI() {
     }
@@ -160,8 +160,8 @@ public final class OpButtonUI {
     /**
      * Mark the current revision as sent.
      */
-    void markSent() {
-        m_sentRevision = m_revision.get();
+    synchronized void markSent(int revision) {
+        m_sentRevision = Math.max(m_sentRevision, revision);
     }
 
     boolean hasTabs() {

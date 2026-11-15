@@ -22,7 +22,7 @@ import okhttp3.Response;
  * Low-level HTTP client for the OpButton server API.
  * Thread-safe — can be shared across threads.
  */
-final class OpButtonHttpClient {
+final class OpButtonHttpClient implements OpButtonPollDelivery.Transport {
     private static final MediaType JSON_MEDIA = MediaType.get("application/json; charset=utf-8");
     private static final RequestBody EMPTY_BODY = RequestBody.create("", JSON_MEDIA);
 
@@ -87,7 +87,7 @@ final class OpButtonHttpClient {
         return execute(request).optBoolean("ok", false);
     }
 
-    JSONObject submitPanel(@NonNull String sessionToken, @NonNull JSONObject layout) throws OpButtonException {
+    @Override public JSONObject submitPanel(@NonNull String sessionToken, @NonNull JSONObject layout) throws OpButtonException {
         JSONObject body = new JSONObject();
         try {
             body.put("layout", layout);
@@ -102,7 +102,7 @@ final class OpButtonHttpClient {
         return execute(request);
     }
 
-    JSONObject pollActions(@NonNull String sessionToken,
+    @Override public JSONObject pollActions(@NonNull String sessionToken,
                            @Nullable Map<String, Object> changedAttributes,
                            @NonNull List<OpButtonLogEntry> logs,
                            @NonNull List<OpButtonMetricEntry> metrics) throws OpButtonException {

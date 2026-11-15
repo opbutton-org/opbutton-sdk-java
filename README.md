@@ -24,6 +24,7 @@ Lightweight Android SDK for connecting apps to **OpButton** — a real-time remo
 
 | Guide | Description |
 |-------|-------------|
+| [Architecture](docs/architecture.md) | Runtime boundaries, delivery receipts, commands and extension points |
 | [Android Integration](docs/android-integration.md) | Setup, configuration, session management |
 | [Widgets](docs/widgets.md) | Tabs, layouts, all widget types, remote actions |
 | [Logging & Events](docs/logging.md) | Structured logs, events, revenue tracking, screen changes |
@@ -138,9 +139,11 @@ The action poll request also acts as the session heartbeat. There is no separate
 
 ## Requirements
 
-- Android API 21+
+- Android API 24+
 - Java 8+
 
 ## License
 
 MIT
+
+Automatic device identity and its reinstall limitations are described in [Device identity](docs/android-integration.md#device-identity). Pass Application Context to enable persistent automatic identity.
