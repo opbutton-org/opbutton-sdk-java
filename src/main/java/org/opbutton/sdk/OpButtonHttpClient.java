@@ -10,6 +10,7 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.MediaType;
@@ -28,16 +29,21 @@ final class OpButtonHttpClient implements OpButtonPollDelivery.Transport {
 
     private final String m_baseUrl;
     private final String m_apiToken;
+    private final String m_runId = UUID.randomUUID().toString();
     private final OkHttpClient m_http;
 
     OpButtonHttpClient(@NonNull String baseUrl, @NonNull String apiToken) {
-        m_baseUrl = baseUrl;
-        m_apiToken = apiToken;
-        m_http = new OkHttpClient.Builder()
+        this(baseUrl, apiToken, new OkHttpClient.Builder()
                 .connectTimeout(15, TimeUnit.SECONDS)
                 .readTimeout(15, TimeUnit.SECONDS)
                 .writeTimeout(15, TimeUnit.SECONDS)
-                .build();
+                .build());
+    }
+
+    OpButtonHttpClient(@NonNull String baseUrl, @NonNull String apiToken, @NonNull OkHttpClient http) {
+        m_baseUrl = baseUrl;
+        m_apiToken = apiToken;
+        m_http = http;
     }
 
     void shutdown() {
@@ -53,6 +59,7 @@ final class OpButtonHttpClient implements OpButtonPollDelivery.Transport {
         try {
             body.put("device_id", deviceId);
             body.put("device_name", deviceName);
+            body.put("run_id", m_runId);
             if (!sessionAttributes.isEmpty()) {
                 JSONObject attrs = new JSONObject();
                 for (Map.Entry<String, Object> entry : sessionAttributes.entrySet()) {
@@ -72,7 +79,7 @@ final class OpButtonHttpClient implements OpButtonPollDelivery.Transport {
     }
 
     OpButtonConnectResponse pollStatus(@NonNull String requestId) throws OpButtonException {
-        Request request = apiTokenRequest("/api/client/poll-status/" + requestId)
+        Request request = apiTokenRequest("/api/client/poll-status/" + requestId + "?run_id=" + m_runId)
                 .get()
                 .build();
 
