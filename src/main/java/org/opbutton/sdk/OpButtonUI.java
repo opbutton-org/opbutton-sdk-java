@@ -66,7 +66,7 @@ public final class OpButtonUI {
      */
     @NonNull
     public OpButtonTab addTab(@NonNull String title) {
-        m_tabs.removeIf(t -> t.getTitle().equals(title));
+        m_tabs.removeIf(t -> { if (!t.getTitle().equals(title)) return false; t.detach(); return true; });
         OpButtonTab tab = new OpButtonTab(this, title);
         m_tabs.add(tab);
         m_revision.incrementAndGet();
@@ -90,7 +90,7 @@ public final class OpButtonUI {
      * Remove a tab by public id.
      */
     public void removeTab(@NonNull String id) {
-        m_tabs.removeIf(t -> t.getId().equals(id));
+        m_tabs.removeIf(t -> { if (!t.getId().equals(id)) return false; t.detach(); return true; });
         m_revision.incrementAndGet();
     }
 

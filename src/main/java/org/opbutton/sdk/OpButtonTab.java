@@ -58,6 +58,8 @@ public final class OpButtonTab {
      */
     @NonNull
     public OpButtonLayout vertical() {
+        if (m_layout != null) m_layout.detach();
+        m_ui.incrementRevision();
         m_layout = new OpButtonLayout(m_ui, OpButtonLayout.Direction.VERTICAL);
         return m_layout;
     }
@@ -67,11 +69,22 @@ public final class OpButtonTab {
      */
     @NonNull
     public OpButtonLayout horizontal() {
+        if (m_layout != null) m_layout.detach();
+        m_ui.incrementRevision();
         m_layout = new OpButtonLayout(m_ui, OpButtonLayout.Direction.HORIZONTAL);
         return m_layout;
     }
 
     @NonNull
+    public OpButtonLayout grid() {
+        if (m_layout != null) m_layout.detach();
+        m_ui.incrementRevision();
+        m_layout = new OpButtonLayout(m_ui, OpButtonLayout.Direction.GRID);
+        return m_layout;
+    }
+
+    void detach() { if (m_layout != null) m_layout.detach(); }
+
     JSONObject toJson() {
         JSONObject json = new JSONObject();
         try {

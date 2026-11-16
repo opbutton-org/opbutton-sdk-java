@@ -12,9 +12,7 @@ import java.util.Objects;
  * Base class for all OpButton UI widgets.
  * Stores properties as a JSONObject for direct serialization.
  */
-public class OpButtonWidget<T extends OpButtonWidget<T>> {
-    protected final OpButtonUI m_ui;
-    protected final int m_internalId;
+public class OpButtonWidget<T extends OpButtonWidget<T>> extends OpButtonElement<T> {
     protected String m_publicId;
     protected final String m_type;
     protected final JSONObject m_json;
@@ -24,8 +22,7 @@ public class OpButtonWidget<T extends OpButtonWidget<T>> {
     private String m_cachedValue;
 
     OpButtonWidget(@NonNull OpButtonUI ui, @NonNull String type) {
-        m_ui = ui;
-        m_internalId = ui.nextId();
+        super(ui);
         m_publicId = type + "-" + m_internalId;
         m_type = type;
         m_json = new JSONObject();
@@ -106,8 +103,10 @@ public class OpButtonWidget<T extends OpButtonWidget<T>> {
         return false;
     }
 
+    @Override void detach() { m_ui.unregisterProvider(this); super.detach(); }
+
     @NonNull
     JSONObject toJson() {
-        return m_json;
+        return decorate(m_json);
     }
 }
