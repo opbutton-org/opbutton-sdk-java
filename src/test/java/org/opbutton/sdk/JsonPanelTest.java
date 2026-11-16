@@ -9,7 +9,7 @@ public class JsonPanelTest {
     @Test
     public void importsJSONAndPreservesNativeBuilders() throws Exception {
         OpButtonUI ui = new OpButtonUI();
-        OpButtonTab tab = ui.addTab("JSON").setId("json");
+        OpButtonTab tab = ui.addTab("json").setName("JSON");
         JSONObject description = new JSONObject("{\"type\":\"layout\",\"direction\":\"grid\",\"gap\":8,\"gridColumns\":3,\"future\":{\"enabled\":true},\"children\":[{\"type\":\"slider\",\"id\":\"speed\",\"label\":\"Speed\",\"min\":0.5,\"max\":3,\"step\":0.1}]}");
         String[] received = {null};
         OpButtonLayout layout = tab.setJson(description, (identifier, action) -> received[0] = identifier);

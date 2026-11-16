@@ -15,14 +15,14 @@ public final class OpButtonTab {
     private final OpButtonUI m_ui;
     private final int m_internalId;
     private String m_publicId;
-    private final String m_title;
+    private String m_title;
     private OpButtonLayout m_layout;
 
-    OpButtonTab(@NonNull OpButtonUI ui, @NonNull String title) {
+    OpButtonTab(@NonNull OpButtonUI ui, @NonNull String id) {
         m_ui = ui;
         m_internalId = ui.nextId();
-        m_publicId = "tab-" + m_internalId;
-        m_title = title;
+        m_publicId = id;
+        m_title = id;
     }
 
     @NonNull
@@ -33,6 +33,13 @@ public final class OpButtonTab {
     @NonNull
     public OpButtonTab setId(@NonNull String id) {
         m_publicId = id;
+        return this;
+    }
+
+    @NonNull
+    public OpButtonTab setName(@NonNull String name) {
+        m_title = name;
+        m_ui.incrementRevision();
         return this;
     }
 

@@ -59,17 +59,28 @@ public final class OpButtonUI {
     // ── Tab management ──
 
     /**
-     * Add a new tab (or replace an existing one with the same title).
+     * Add a new tab (or replace an existing one with the same id).
      *
-     * @param title Tab display title (also used as default id)
+     * @param id Public id, also used as the default display name
      * @return The new tab for building its layout
      */
     @NonNull
-    public OpButtonTab addTab(@NonNull String title) {
-        m_tabs.removeIf(t -> { if (!t.getTitle().equals(title)) return false; t.detach(); return true; });
-        OpButtonTab tab = new OpButtonTab(this, title);
+    public synchronized OpButtonTab addTab(@NonNull String id) {
+        m_tabs.removeIf(t -> { if (!t.getId().equals(id)) return false; t.detach(); return true; });
+        OpButtonTab tab = new OpButtonTab(this, id);
         m_tabs.add(tab);
         m_revision.incrementAndGet();
+        return tab;
+    }
+
+    @NonNull
+    public synchronized OpButtonTab getOrCreateTab(@NonNull String id) {
+        OpButtonTab tab = this.getTab(id);
+
+        if (tab == null) {
+            tab = this.addTab(id);
+        }
+
         return tab;
     }
 
@@ -77,7 +88,7 @@ public final class OpButtonUI {
      * Get an existing tab by public id.
      */
     @Nullable
-    public OpButtonTab getTab(@NonNull String id) {
+    public synchronized OpButtonTab getTab(@NonNull String id) {
         for (OpButtonTab tab : m_tabs) {
             if (tab.getId().equals(id)) {
                 return tab;
@@ -89,7 +100,7 @@ public final class OpButtonUI {
     /**
      * Remove a tab by public id.
      */
-    public void removeTab(@NonNull String id) {
+    public synchronized void removeTab(@NonNull String id) {
         m_tabs.removeIf(t -> { if (!t.getId().equals(id)) return false; t.detach(); return true; });
         m_revision.incrementAndGet();
     }
@@ -164,7 +175,7 @@ public final class OpButtonUI {
         m_sentRevision = Math.max(m_sentRevision, revision);
     }
 
-    boolean hasTabs() {
+    synchronized boolean hasTabs() {
         return !m_tabs.isEmpty();
     }
 
@@ -175,7 +186,7 @@ public final class OpButtonUI {
     // ── Serialization ──
 
     @NonNull
-    public JSONObject toJson() {
+    public synchronized JSONObject toJson() {
         JSONObject json = new JSONObject();
         try {
             json.put("version", m_version);
