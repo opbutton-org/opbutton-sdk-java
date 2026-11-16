@@ -53,7 +53,7 @@ import java.util.Map;
  * }</pre>
  */
 public final class OpButton {
-    public static final String VERSION = "1.0.36";
+    public static final String VERSION = "1.0.37";
 
     private static volatile OpButtonRuntime s_instance;
 

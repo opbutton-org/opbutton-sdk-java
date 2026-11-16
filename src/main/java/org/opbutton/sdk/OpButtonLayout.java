@@ -143,6 +143,48 @@ public final class OpButtonLayout extends OpButtonElement<OpButtonLayout> {
         return widget;
     }
 
+    static OpButtonLayout fromJson(OpButtonUI ui, JSONObject source, OpButtonJsonCallback callback) throws JSONException {
+        JSONObject description = new JSONObject(source.toString());
+
+        if (!"layout".equals(description.getString("type"))) {
+            throw new IllegalArgumentException("OpButton JSON root must be a layout");
+        }
+
+        Direction direction;
+
+        switch (description.getString("direction")) {
+            case "vertical": direction = Direction.VERTICAL; break;
+            case "horizontal": direction = Direction.HORIZONTAL; break;
+            case "grid": direction = Direction.GRID; break;
+            default: throw new IllegalArgumentException("Invalid OpButton JSON layout direction");
+        }
+        OpButtonLayout layout = new OpButtonLayout(ui, direction);
+        java.util.Iterator<String> keys = description.keys();
+
+        while (keys.hasNext()) {
+            String key = keys.next();
+
+            if ("children".equals(key) || "id".equals(key) || "placement".equals(key)) {
+                continue;
+            }
+
+            layout.m_settings.put(key, description.get(key));
+        }
+
+        layout.loadPlacement(description);
+        JSONArray children = description.has("children") ? description.getJSONArray("children") : new JSONArray();
+
+        for (int index = 0; index != children.length(); ++index) {
+            layout.m_children.add(new OpButtonJsonElement(ui, children.getJSONObject(index), 0));
+        }
+
+        for (Object child : layout.m_children) {
+            ((OpButtonJsonElement)child).attach(callback);
+        }
+
+        return layout;
+    }
+
     @Override void detach() {
         for (Object child : m_children) ((OpButtonElement<?>)child).detach();
         super.detach();
@@ -159,6 +201,7 @@ public final class OpButtonLayout extends OpButtonElement<OpButtonLayout> {
             for (Object child : m_children) {
                 if (child instanceof OpButtonLayout) children.put(((OpButtonLayout)child).toJson());
                 else if (child instanceof OpButtonWidget) children.put(((OpButtonWidget<?>)child).toJson());
+                else if (child instanceof OpButtonJsonElement) children.put(((OpButtonJsonElement)child).toJson());
                 else if (child instanceof PaddingElement) children.put(((PaddingElement)child).toJson());
                 else if (child instanceof CollapsibleElement) children.put(((CollapsibleElement)child).toJson());
             }

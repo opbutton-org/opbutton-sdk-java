@@ -47,6 +47,21 @@ public class OpButtonElement<T extends OpButtonElement<T>> {
     public T maxWidth(double pixels) { return place("maxWidth", size(pixels, true)); }
     public T alignSelf(String value) { return place("alignSelf", alignment(value)); }
 
+    void loadPlacement(JSONObject description) throws JSONException {
+        JSONObject placement = description.optJSONObject("placement");
+
+        if (placement == null) {
+            return;
+        }
+
+        java.util.Iterator<String> keys = placement.keys();
+
+        while (keys.hasNext()) {
+            String key = keys.next();
+            m_placement.put(key, placement.get(key));
+        }
+    }
+
     void detach() { m_ui.registerCallback(m_internalId, null); }
 
     protected JSONObject decorate(JSONObject json) {

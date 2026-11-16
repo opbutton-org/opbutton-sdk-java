@@ -83,6 +83,30 @@ public final class OpButtonTab {
         return m_layout;
     }
 
+    @NonNull
+    public OpButtonLayout setJson(@NonNull JSONObject description) {
+        return setJson(description, null);
+    }
+
+    @NonNull
+    public OpButtonLayout setJson(@NonNull JSONObject description, @Nullable OpButtonJsonCallback callback) {
+        final OpButtonLayout layout;
+
+        try {
+            layout = OpButtonLayout.fromJson(m_ui, description, callback);
+        } catch (JSONException exception) {
+            throw new IllegalArgumentException("Invalid OpButton JSON layout", exception);
+        }
+
+        if (m_layout != null) {
+            m_layout.detach();
+        }
+
+        m_layout = layout;
+        m_ui.incrementRevision();
+        return layout;
+    }
+
     void detach() { if (m_layout != null) m_layout.detach(); }
 
     JSONObject toJson() {
