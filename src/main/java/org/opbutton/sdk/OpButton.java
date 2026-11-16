@@ -24,7 +24,7 @@ import java.util.Map;
  *     .setDeviceId("my-device")
  *     .setDeviceName("Pixel 8 (Android 14)")
  *     .build();
- * OpButton.initialize(config);
+ * OpButton.initialize(config, applicationContext);
  *
  * // 2. Listen for actions
  * OpButton.addActionListener(action -> {
@@ -82,6 +82,10 @@ public final class OpButton {
      *                touch overlay support. Can be null.
      */
     public static void initialize(@NonNull OpButtonConfig config, @Nullable Context context) {
+        if (context == null && config.deviceSecret == null) {
+            throw new IllegalArgumentException(
+                    "Android Context is required unless setDeviceSecret() uses caller-owned secure storage");
+        }
         if (s_instance != null) {
             OpButtonLog.w("OpButton.initialize() called more than once, ignoring");
             return;

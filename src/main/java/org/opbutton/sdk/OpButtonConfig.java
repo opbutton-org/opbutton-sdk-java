@@ -3,6 +3,8 @@ package org.opbutton.sdk;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import java.net.URI;
+
 /**
  * Configuration for {@link OpButton} initialization.
  */
@@ -20,6 +22,8 @@ public final class OpButtonConfig {
     final OpButtonSessionAttributeBuilder sessionAttributes;
     final OpButtonLogConfigBuilder logConfig;
     final OpButtonMetricConfigBuilder metricConfig;
+    final String deviceSecret;
+    final boolean allowInsecureLocalhost;
 
     private OpButtonConfig(Builder builder) {
         this.baseUrl = builder.baseUrl;
@@ -35,6 +39,8 @@ public final class OpButtonConfig {
         this.sessionAttributes = builder.sessionAttributes;
         this.logConfig = builder.logConfig;
         this.metricConfig = builder.metricConfig;
+        this.deviceSecret = builder.deviceSecret;
+        this.allowInsecureLocalhost = builder.allowInsecureLocalhost;
     }
 
     @NonNull
@@ -71,6 +77,8 @@ public final class OpButtonConfig {
         private OpButtonSessionAttributeBuilder sessionAttributes = new OpButtonSessionAttributeBuilder();
         private OpButtonLogConfigBuilder logConfig = new OpButtonLogConfigBuilder();
         private OpButtonMetricConfigBuilder metricConfig = new OpButtonMetricConfigBuilder();
+        private String deviceSecret;
+        private boolean allowInsecureLocalhost;
 
         /**
          * @param baseUrl  OpButton server URL, e.g. "https://opbutton.example.com"
@@ -88,6 +96,18 @@ public final class OpButtonConfig {
 
         public Builder setDeviceName(@NonNull String deviceName) {
             this.deviceName = deviceName;
+            return this;
+        }
+
+        /** Supplies a pre-provisioned per-install secret instead of local persistence. */
+        public Builder setDeviceSecret(@NonNull String deviceSecret) {
+            this.deviceSecret = deviceSecret;
+            return this;
+        }
+
+        /** Allow cleartext HTTP only for localhost development servers. */
+        public Builder setAllowInsecureLocalhost(boolean allow) {
+            this.allowInsecureLocalhost = allow;
             return this;
         }
 
@@ -184,10 +204,45 @@ public final class OpButtonConfig {
             if (baseUrl == null || baseUrl.isEmpty()) {
                 throw new IllegalArgumentException("baseUrl is required");
             }
-            if (apiToken == null || apiToken.isEmpty()) {
-                throw new IllegalArgumentException("apiToken is required");
+            if (apiToken == null || apiToken.isEmpty() || !isSafeHeaderValue(apiToken)) {
+                throw new IllegalArgumentException(
+                        "apiToken is required and must contain only printable ASCII characters");
+            }
+            if (pollIntervalMs < 250 || pollIntervalMs > 300000
+                    || actionPollIntervalMs < 250 || actionPollIntervalMs > 300000) {
+                throw new IllegalArgumentException("poll intervals must be between 250ms and 300000ms");
+            }
+            if (deviceSecret != null && (deviceSecret.length() < 32
+                    || deviceSecret.length() > 256 || !isSafeHeaderValue(deviceSecret))) {
+                throw new IllegalArgumentException(
+                        "deviceSecret must contain 32 to 256 printable ASCII characters");
+            }
+            URI uri;
+            try { uri = URI.create(baseUrl); }
+            catch (IllegalArgumentException e) { throw new IllegalArgumentException("baseUrl is invalid", e); }
+            String scheme = uri.getScheme();
+            String host = uri.getHost();
+            boolean local = "localhost".equalsIgnoreCase(host) || "127.0.0.1".equals(host)
+                    || "::1".equals(host) || "[::1]".equals(host);
+            if (!"https".equalsIgnoreCase(scheme)
+                    && !(allowInsecureLocalhost && "http".equalsIgnoreCase(scheme) && local)) {
+                throw new IllegalArgumentException(
+                        "baseUrl must use HTTPS; localhost HTTP requires setAllowInsecureLocalhost(true)");
+            }
+            if (uri.getUserInfo() != null || host == null
+                    || uri.getRawQuery() != null || uri.getRawFragment() != null) {
+                throw new IllegalArgumentException(
+                        "baseUrl must have a host and must not contain credentials, a query, or a fragment");
             }
             return new OpButtonConfig(this);
+        }
+
+        private static boolean isSafeHeaderValue(@NonNull String value) {
+            for (int index = 0; index != value.length(); ++index) {
+                char character = value.charAt(index);
+                if (character < 0x21 || character > 0x7e) return false;
+            }
+            return true;
         }
     }
 }

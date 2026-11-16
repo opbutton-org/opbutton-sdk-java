@@ -5,7 +5,7 @@ Step-by-step guide for adding OpButton SDK to your Android project.
 ## Requirements
 
 - Android API 24+
-- Java 8+ or Kotlin
+- JDK 17+ and Java or Kotlin application sources
 
 ## 1. Add JitPack repository
 
@@ -16,7 +16,13 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
-        maven { url 'https://jitpack.io' }
+        exclusiveContent {
+            forRepository { maven { url 'https://jitpack.io' } }
+            filter {
+                includeGroup 'com.github.opbutton-org'
+                includeGroup 'com.github.davidliu'
+            }
+        }
     }
 }
 ```
@@ -27,9 +33,11 @@ In your module `build.gradle`:
 
 ```groovy
 dependencies {
-    implementation 'com.github.opbutton-org:opbutton-sdk-java:master-SNAPSHOT'
+    implementation 'com.github.opbutton-org:opbutton-sdk-java:<reviewed-release-tag>'
 }
 ```
+
+Use an immutable reviewed release tag in production, not `master-SNAPSHOT`.
 
 ## 3. Configure the SDK
 
@@ -52,6 +60,8 @@ OpButton.initialize(config, this); // pass Application context
 |--------|---------|-------------|
 | `setDeviceId(String)` | auto | Custom device identifier |
 | `setDeviceName(String)` | — | Human-readable device name shown in dashboard |
+| `setDeviceSecret(String)` | generated | Host-provisioned 32–256 printable-ASCII installation credential |
+| `setAllowInsecureLocalhost(boolean)` | false | Permit plain HTTP only for loopback development URLs |
 | `setPollIntervalMs(long)` | 10000 | Status polling interval (ms) |
 | `setActionPollIntervalMs(long)` | 2000 | Action polling interval (ms) |
 | `setAutoConnect(boolean)` | true | Connect automatically after init |
@@ -145,6 +155,16 @@ The default resolver tries these strategies in order:
 Factory resets, signing-key changes and Android user/profile changes can change `ANDROID_ID`. There is also a documented Android 8 OTA/reinstall exception. See the [Android documentation](https://developer.android.com/reference/android/provider/Settings.Secure#ANDROID_ID).
 
 Upgrading from the old model-based fallback creates a new device request and requires approval once. The SDK does not infer which physical phone owned a shared model ID.
+
+## Device credential and transport
+
+Every installation also owns a random credential that proves approval polling belongs to the same installation that requested access. The SDK generates it before the first request and, when initialized with an Application Context, stores it in `noBackupFilesDir`. Android backup therefore cannot clone it onto another device. The server stores only a SHA-256 digest.
+
+Without Context, the credential survives reconnects only inside the current SDK runtime. Reinitializing then creates another credential and requires approval again. Pass Application Context, or load a 32–256 character printable-ASCII credential from your own secure storage and call `setDeviceSecret(...)`.
+
+Production server URLs must use HTTPS and may not contain credentials, a query, or a fragment. For local development only, call `setAllowInsecureLocalhost(true)` to permit `http://localhost`, `http://127.0.0.1`, or `http://[::1]`.
+
+Existing approved devices are intentionally returned to pending once when the server migration enables installation credentials. Re-approve the upgraded installation after confirming it is the expected device.
 
 ## Delivery and recovery
 

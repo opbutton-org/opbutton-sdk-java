@@ -36,6 +36,7 @@ final class OpButtonRuntime {
     private final OpButtonHostState m_hostState;
     private final OpButtonPollDelivery m_delivery;
     private final OpButtonDeviceIdentity m_deviceIdentity;
+    private final OpButtonDeviceCredentialStore m_credentialStore;
 
     private final CopyOnWriteArrayList<OpButtonActionListener> m_actionListeners = new CopyOnWriteArrayList<>();
     private final CopyOnWriteArrayList<OpButtonSessionListener> m_sessionListeners = new CopyOnWriteArrayList<>();
@@ -55,6 +56,7 @@ final class OpButtonRuntime {
     OpButtonRuntime(@NonNull OpButtonConfig config, @Nullable Context context) {
         m_config = config;
         m_deviceIdentity = OpButtonDeviceIdentity.forContext(context);
+        m_credentialStore = new OpButtonDeviceCredentialStore(context);
         m_httpClient = new OpButtonHttpClient(config.baseUrl, config.apiToken);
         m_telemetry = new OpButtonTelemetry(config.logConfig, m_httpClient, m_metrics);
         m_hostState = new OpButtonHostState(config.sessionAttributes, m_ui, m_mainHandler);
@@ -208,6 +210,9 @@ final class OpButtonRuntime {
 
         String deviceId = m_deviceIdentity.resolve(m_config.deviceId);
         String deviceName = m_config.deviceName;
+        String deviceSecret = m_credentialStore.getOrCreate(
+                m_config.baseUrl, deviceId, m_config.deviceSecret);
+        m_httpClient.setDeviceSecret(deviceSecret);
 
         if (deviceName == null || deviceName.isEmpty()) {
             deviceName = Build.MODEL + " (Android " + Build.VERSION.RELEASE + ")";
@@ -215,6 +220,10 @@ final class OpButtonRuntime {
 
         Map<String, Object> attributes = m_hostState.resolveAllSessionAttributes();
         OpButtonConnectResponse resp = m_httpClient.connect(deviceId, deviceName, attributes);
+        if (resp.getDeviceSecret() != null) {
+            m_httpClient.setDeviceSecret(resp.getDeviceSecret());
+            m_credentialStore.save(m_config.baseUrl, deviceId, resp.getDeviceSecret());
+        }
         m_hostState.acknowledgeAll(attributes);
         m_requestId.set(resp.getRequestId());
 

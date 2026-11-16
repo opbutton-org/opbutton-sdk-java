@@ -38,15 +38,25 @@ Lightweight Android SDK for connecting apps to **OpButton** — a real-time remo
 // settings.gradle
 dependencyResolutionManagement {
     repositories {
-        maven { url 'https://jitpack.io' }
+        google()
+        mavenCentral()
+        exclusiveContent {
+            forRepository { maven { url 'https://jitpack.io' } }
+            filter {
+                includeGroup 'com.github.opbutton-org'
+                includeGroup 'com.github.davidliu'
+            }
+        }
     }
 }
 
 // build.gradle
 dependencies {
-    implementation 'com.github.opbutton-org:opbutton-sdk-java:master-SNAPSHOT'
+    implementation 'com.github.opbutton-org:opbutton-sdk-java:<reviewed-release-tag>'
 }
 ```
+
+Pin an immutable reviewed release tag in production. Do not use `master-SNAPSHOT`.
 
 ```java
 // Initialize
@@ -84,6 +94,9 @@ To enable the media pipeline, the backend must be configured with LiveKit creden
 
 ## Connection flow
 
+- The server URL must use HTTPS. Plain HTTP is accepted only for `localhost`, `127.0.0.1`, or `::1` after calling `setAllowInsecureLocalhost(true)`.
+- Each installation generates a high-entropy device credential. With an Application Context, it is stored in the app-private `noBackupFilesDir` and is not copied to another device by Android backup.
+- `setDeviceSecret(...)` is available when the host provisions the credential from its own secure storage. Values must contain 32–256 printable ASCII characters.
 - While the device is waiting for approval, the SDK polls approval status every 10 seconds by default.
 - After approval, action polling becomes the live session heartbeat.
 - Dynamic session attributes are piggybacked on action polling, so there is no separate active-session heartbeat loop.
@@ -140,10 +153,11 @@ The action poll request also acts as the session heartbeat. There is no separate
 ## Requirements
 
 - Android API 24+
-- Java 8+
+- JDK 17+ for builds; the published Android library requires API 24+
 
 ## License
 
 MIT
 
 Automatic device identity and its reinstall limitations are described in [Device identity](docs/android-integration.md#device-identity). Pass Application Context to enable persistent automatic identity.
+Upgrading a previously approved installation to the credential-aware protocol requires one explicit dashboard re-approval.
