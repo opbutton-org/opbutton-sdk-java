@@ -55,8 +55,8 @@ final class OpButtonRuntime {
 
     OpButtonRuntime(@NonNull OpButtonConfig config, @Nullable Context context) {
         m_config = config;
-        m_deviceIdentity = OpButtonDeviceIdentity.forContext(context);
         m_credentialStore = new OpButtonDeviceCredentialStore(context);
+        m_deviceIdentity = OpButtonDeviceIdentity.forContext(context, config, m_credentialStore);
         m_httpClient = new OpButtonHttpClient(config.baseUrl, config.apiToken);
         m_telemetry = new OpButtonTelemetry(config.logConfig, m_httpClient, m_metrics);
         m_hostState = new OpButtonHostState(config.sessionAttributes, m_ui, m_mainHandler);

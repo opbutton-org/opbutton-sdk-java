@@ -146,25 +146,19 @@ The SDK ships its own `consumer-rules.pro`. No additional ProGuard configuration
 Pass an Application (or its Context) to `OpButton.initialize(config, application)` for automatic persistent identity.
 An explicit `setDeviceId(...)` always takes precedence.
 
-The default resolver tries these strategies in order:
+New installations use a UUID with the `installation-v1:` prefix. The SDK saves it with the same lifetime as the device credential in `noBackupFilesDir`. Restarts keep both values. Clearing app data or reinstalling creates a new pair and requires approval.
 
-1. SHA-256 of `ANDROID_ID`, scoped to the application package (`android-v1:` prefix). This normally survives app restarts, data clearing and reinstalling the same signed application on the same Android user/device. The raw system identifier is not transmitted.
-2. A UUID saved in the app's `noBackupFilesDir` (`installation-v1:` prefix), when the system identifier is unavailable. It survives SDK/app restarts. Clearing app data or uninstalling resets this fallback. Excluding it from backup prevents a restored backup on another phone from duplicating the device identity.
-3. A process UUID (`process-v1:` prefix), if Context or persistent storage is unavailable. It survives SDK reconnects and reinitialization within that process only. Supply Context or an explicit ID when persistence is needed.
-
-Factory resets, signing-key changes and Android user/profile changes can change `ANDROID_ID`. There is also a documented Android 8 OTA/reinstall exception. See the [Android documentation](https://developer.android.com/reference/android/provider/Settings.Secure#ANDROID_ID).
-
-Upgrading from the old model-based fallback creates a new device request and requires approval once. The SDK does not infer which physical phone owned a shared model ID.
+The previous package-scoped Android identity remains usable when its credential is stored locally or supplied by the host. Upgrading from a version that never stored that credential creates a new device request.
 
 ## Device credential and transport
 
 Every installation also owns a random credential that proves approval polling belongs to the same installation that requested access. The SDK generates it before the first request and, when initialized with an Application Context, stores it in `noBackupFilesDir`. Android backup therefore cannot clone it onto another device. The server stores only a SHA-256 digest.
 
-Without Context, the credential survives reconnects only inside the current SDK runtime. Reinitializing then creates another credential and requires approval again. Pass Application Context, or load a 32–256 character printable-ASCII credential from your own secure storage and call `setDeviceSecret(...)`.
+Without Context, the host must load a 32–256 character printable-ASCII credential from its own secure storage and pass it to `setDeviceSecret(...)`. Supply a matching `setDeviceId(...)` for identity across processes. The default process UUID lasts until the application process exits.
 
 Production server URLs must use HTTPS and may not contain credentials, a query, or a fragment. For local development only, call `setAllowInsecureLocalhost(true)` to permit `http://localhost`, `http://127.0.0.1`, or `http://[::1]`.
 
-Existing approved devices are intentionally returned to pending once when the server migration enables installation credentials. Re-approve the upgraded installation after confirming it is the expected device.
+When a new installation requests access, approve it after confirming it is the expected device.
 
 ## Delivery and recovery
 

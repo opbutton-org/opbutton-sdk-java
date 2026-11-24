@@ -37,6 +37,30 @@ public class DeviceIdentityTest {
         assertNotEquals(id, OpButtonDeviceIdentity.installationIdentity(directory.newFolder()));
     }
 
+    @Test public void reinstallDoesNotReuseAndroidIdentityWithoutItsCredential() throws Exception {
+        String androidId = "android-v1:existing-device";
+        java.io.File firstDirectory = directory.newFolder();
+        java.io.File secondDirectory = directory.newFolder();
+        OpButtonDeviceIdentity first = OpButtonDeviceIdentity.withInstallationIdentity(
+                () -> androidId, () -> OpButtonDeviceIdentity.installationIdentity(firstDirectory), id -> false);
+        OpButtonDeviceIdentity second = OpButtonDeviceIdentity.withInstallationIdentity(
+                () -> androidId, () -> OpButtonDeviceIdentity.installationIdentity(secondDirectory), id -> false);
+
+        String firstId = first.resolve(null);
+        assertTrue(firstId.startsWith("installation-v1:"));
+        assertEquals(firstId, first.resolve(null));
+        assertNotEquals(firstId, second.resolve(null));
+        assertNotEquals(androidId, second.resolve(null));
+    }
+
+    @Test public void existingAndroidIdentityKeepsItsStoredCredential() {
+        String androidId = "android-v1:approved-device";
+        OpButtonDeviceIdentity identity = OpButtonDeviceIdentity.withInstallationIdentity(
+                () -> androidId, () -> { fail("Unexpected installation identity"); return null; }, androidId::equals);
+
+        assertEquals(androidId, identity.resolve(null));
+    }
+
     @Test public void contextlessFallbackIsStableAcrossSdkReinitializationInOneProcess() {
         assertEquals(new OpButtonDeviceIdentity().resolve(null), new OpButtonDeviceIdentity().resolve(null));
     }

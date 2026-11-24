@@ -23,6 +23,11 @@ final class OpButtonDeviceCredentialStore {
         m_context = context == null ? null : context.getApplicationContext();
     }
 
+    boolean hasStoredCredential(@NonNull String baseUrl, @NonNull String deviceId) {
+        File file = credentialFile(key(baseUrl, deviceId));
+        return file != null && file.isFile();
+    }
+
     @NonNull String getOrCreate(@NonNull String baseUrl, @NonNull String deviceId,
                                 @Nullable String configuredSecret) throws OpButtonException {
         if (configuredSecret != null) return configuredSecret;

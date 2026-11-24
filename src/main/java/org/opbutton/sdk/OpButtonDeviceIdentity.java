@@ -13,8 +13,9 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Locale;
 import java.util.UUID;
+import java.util.function.Predicate;
 
-/** Ordered identity strategies: host override, scoped Android ID, installation, process. */
+/** Uses an installation identity unless the host or a stored credential supplies an existing one. */
 final class OpButtonDeviceIdentity {
     interface Source { String resolve(); }
 
@@ -36,14 +37,25 @@ final class OpButtonDeviceIdentity {
         return PROCESS_ID;
     }
 
-    static OpButtonDeviceIdentity forContext(Context context) {
+    static OpButtonDeviceIdentity forContext(Context context, OpButtonConfig config,
+                                             OpButtonDeviceCredentialStore credentials) {
         if (context == null) return new OpButtonDeviceIdentity();
         Context application = context.getApplicationContext();
         Context owner = application != null ? application : context;
-        return new OpButtonDeviceIdentity(
+        return withInstallationIdentity(
             () -> secureIdentity(owner),
-            () -> installationIdentity(owner.getNoBackupFilesDir())
+            () -> installationIdentity(owner.getNoBackupFilesDir()),
+            id -> config.deviceSecret != null || credentials.hasStoredCredential(config.baseUrl, id)
         );
+    }
+
+    static OpButtonDeviceIdentity withInstallationIdentity(Source androidIdentity, Source installation,
+                                                           Predicate<String> hasCredential) {
+        return new OpButtonDeviceIdentity(() -> {
+            String id = androidIdentity.resolve();
+            if (id == null || !hasCredential.test(id)) return null;
+            return id;
+        }, installation);
     }
 
     static String scopedAndroidId(String packageName, String androidId) {
